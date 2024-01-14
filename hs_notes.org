@@ -1,0 +1,333 @@
+#+OPTIONS: num:nil toc:nil date:nil
+#+LATEX_HEADER: \usepackage[cm]{fullpage}
+# #+PROPERTY: header-args: :noweb yes :exports results
+
+* main
+** using commas
+- 5: one syntonic comma is 81/80 or 21.5 cents
+- 7: one septimal comma is 64/43 or 27.3 cents
+- 11: approximated to one undecimal quartertone (Richard H. Stein) 33/32 or 53.3 cents
+- 5: grave fifth 40/27
+- 9: pythagorean minor seven
+
+  1/1 81/80 
+
+* scsynth
+
+* Sound
+  Load ~midi_ctrl~ and play with the preset in the table, or create a new table.
+
+Free function
+#+name: free_all
+#+begin_src sclang :results none
+  MIDIIn.removeFuncFrom(\noteOn, ~noteOn);
+  MIDIIn.removeFuncFrom(\noteOff, ~noteOff);
+  MIDIIn.removeFuncFrom(\control, ~control);
+#+end_src
+
+Main function that loads all other functions. Takes midi input and process it accordingly.
+#+name: midi_ctrl
+#+begin_src sclang :results none :noweb yes  :var tab=tab_notes
+  (
+  <<play_function>>
+  <<set_function>>
+  <<tune_function>>
+  <<harmonic_synthdef>>
+  <<check_active_synth>>
+  <<tune_param_general>>
+  <<lookup_row>>
+
+  MIDIClient.init;
+  MIDIIn.connectAll;
+  MIDIIn.connect;    // init for one port midi interface
+
+  // arrays
+  ~tuneup = Array.new(24);
+  ~synths = Array.new(48);
+  ~crnt = Array.new(16);
+
+  ~noteOff = { arg src, chan, num, vel;
+    	//  	[chan,num,vel / 127].postln;
+  };
+
+  ~noteOn = { arg src, chan, num, vel;
+  	"noteon: ".post;
+    	[chan,num,vel / 127].postln;
+    	if(chan == 4, 
+  		{
+  			if( ~update_crnt.value(num) == 0,
+  				{
+  					~play_tune.value(num);
+  					~crnt.add(num);
+  				}, {
+  					~tuner_set.value(num, \gate, 0);
+  				}
+  			);
+  		});
+  };
+
+  ~control = { arg src, chan, num, val;
+    	"here".postln;
+    	[chan,num,val].postln;
+  	// this is the button control
+  	if(chan == 0,
+    		{
+    		if(val > 0,
+  				{
+  					~play_note.value(num)
+  				}, {
+  					~setter.value(num, \gate, 0)
+  				}
+    			);
+    		});
+    	// for push buttons
+  	if(chan == 4,
+    		{
+    			~tuner.value(num, \freq, val);
+    		});
+  };
+
+  MIDIIn.addFuncTo(\noteOn, ~noteOn);
+  MIDIIn.addFuncTo(\noteOff, ~noteOff);
+  MIDIIn.addFuncTo(\control, ~control);
+  );
+#+end_src
+
+#+begin_src sclang :results none
+~update_crnt.value(1).postln;
+#+end_src
+
+#+name: check_active_synth
+#+begin_src sclang :results none
+  ~update_crnt = { arg id;
+  	var res = 0;
+  	~crnt.do({ arg item, i;
+    		if(item == id,
+  			{"found".postln;
+  				~crnt.postln;
+  				~crnt.removeAt(i);
+  				res = -1;},
+  			{}
+  		);
+    	});
+  	res;
+  };
+ #+end_src
+
+Function to start a synth at the ratio specified by the table lookup.
+#+name: play_function
+#+begin_src sclang :results none :noweb yes :var tab=tab_notes
+  <<lookup>>
+  ~play_note = { arg val=0;
+  	var index = val, fund  = 60, ratio = 1/1, freq = ~main_root;
+  	ratio = ~find_row.value(index)[3];
+  	fund = fund + ~find_row.value(index)[1];
+  	freq = ratio * (fund.midicps);
+  	"lookup gives: ".post; ~find_row.value(index).postln;
+  	"index is: ".post; index.postln;
+  	"ratio is: ".post; ratio.postln;
+  	"freq is: ".post; freq.postln;
+  	~synths.add(Synth.new(\osc, [\root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
+  };
+
+#+end_src
+
+#+begin_src sclang :results none
+  ~find_row.value(44).postln;
+#+end_src
+
+Function to start a tunable synth at the ratio specified by the table lookup.
+#+name: tune_function
+#+begin_src sclang :results none :noweb yes :var tab=tab_notes
+  <<tune_adjust_function>>
+  ~play_tune = { arg val=0;
+  	var index = val, fund = 60, ratio = 1/1, freq = ~main_root;
+  	ratio = ~find_row.value(index)[3];
+  	fund = fund + ~find_row.value(index)[1];
+  	freq = ratio * (fund.midicps);
+  	"find_row gives: ".post; ~find_row.value(index).postln;
+  	"index is: ".post; index.postln;
+  	"ratio is: ".post; ratio.postln;
+  	"freq is: ".post; freq.postln;
+  	~tuneup.add(Synth.new(\osc, [\root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
+  };
+
+#+end_src
+
+Function returns an array with the key, octave, index and ratio (as a decimal)
+#+name: lookup_row
+#+begin_src sclang :results none :var tab=tab_notes
+  ~find_row = { arg num;
+  	var return, key, octave, harmi, ratio;
+  	tab.size.do({ arg i;
+  		if(tab[i][1] == num,
+  			{
+  				return = tab[i];
+  				key = tab[i][1];
+  				octave = tab[i][2];
+  				harmi = tab[i][3];
+  				ratio = tab[i][4] / tab[i][5];
+  			}
+  		);
+  	});
+  	return = [key, octave, harmi, ratio];
+  };
+
+//  ~find_row.value(62).postln;
+#+end_src
+
+#+begin_src sclang :results none
+  a = Synth.new(\osc, [\root, 200, \freq, 440, \amplitude, 0.3 , \gate, 1]);
+#+end_src
+
+#+begin_src sclang
+  ~find_row.value(60).postln;
+#+end_src
+
+#+RESULTS:
+: ~find_row.value(60).postln;
+
+#+name: set_function
+#+begin_src sclang :results none
+  ~setter = { arg index, param, val=0;
+    	~synths.do({ arg item, i;
+    		item.get(\index, { arg value;
+    			if(value == index,
+  				{
+  					item.set(param, 0);
+  					~synths.removeAt(i);				
+  				}, {}
+    			);
+    		});
+    	});
+
+  };
+#+end_src
+
+#+name: tune_adjust_function
+#+begin_src sclang :results none :var tab=tab_notes
+  ~tuner = { arg index, param, val=0;
+  	var freq, fund = 60, ratio;
+  	ratio = ~find_row.value(index)[3];
+  	fund = fund + ~find_row.value(index)[1];
+  	freq = ratio * (fund.midicps);
+  	freq = freq + ((val - 64) / 16);
+    	~tuneup.do({ arg item, i;
+    		item.get(\index, {arg value;
+    			if(value == index,
+  				{
+  					item.set(param, freq);
+  				}, {}
+    			);
+    		});
+    	});
+  };
+#+end_src
+
+#+name: tune_param_general
+#+begin_src sclang :results none
+  ~tuner_set = { arg index, param, val=0;
+  	~tuneup.do({ arg item, i;
+  		item.get(\index, {arg value;
+  			if(value == index, {
+  				item.set(param, val);
+  				~tuneup.removeAt(i);
+  			},
+  				{}
+  			);
+  		});
+  	});
+
+  };
+#+end_src
+
+Can't get data out of the script.
+#+name: tune_param_get
+#+begin_src sclang :results none
+  ~nther = 0;
+  ~tuner_get = { arg index;
+  	var return;
+  	~tuneup.do({ arg item, i;
+  		return = item.getn(\freq, 10, {arg val;
+  			~testme.value(val[0]);
+  			//val[0].postln;			
+  		});
+  	});
+  };
+
+  ~testme = {arg val;
+  //  	"here".postln;
+//    	val.postln;
+  	~nther = val;
+  };
+
+  ~tuner_get.value(61);
+~nther.postln;
+#+end_src
+
+#+name: harmonic_synthdef
+#+begin_src sclang :results none
+  SynthDef(\osc, {
+          var sig, index = \index.kr(0);
+          sig = SinOsc.ar(\freq.kr(440), 0, \amplitude.kr(0.2));
+          Out.ar(\out.ir(0), sig * EnvGen.kr(Env.adsr, \gate.kr(1), doneAction: Done.freeSelf));
+  }).add;
+#+end_src
+
+Function returns an array with the key, octave, index and ratio (as a decimal)
+#+name: lookup
+#+begin_src sclang :results none :var tab=tab_notes
+  ~lookup = { arg index=0;
+          var i = index + 2,
+          key = tab[i][1],
+          octave = tab[i][2],
+          harmi = tab[i][3],
+          ratio = tab[i][4] / tab[i][5],
+          result = [key, octave, harmi, ratio];
+  };
+#+end_src
+
+First column is an index, second is the root of the input signal (MIDI), third is the index in the harmonic series. Fourth and fifth are the nominator and the denominator
+#+name: tab_notes
+| index | BU16 | root | harmonic | 5- limit |    |
+|       |      |      |   series |        N |  D |
+|-------+------+------+----------+----------+----|
+|     0 |   36 |    0 |        1 |       16 | 15 |
+|     1 |   37 |    0 |        2 |        8 |  5 |
+|     2 |   38 |    0 |        3 |        6 |  5 |
+|     3 |   39 |    0 |        4 |        9 |  5 |
+|     4 |   40 |    0 |        5 |        4 |  3 |
+|     5 |   41 |    0 |        6 |        1 |  1 |
+|     6 |   42 |    0 |        7 |        3 |  2 |
+|     7 |   43 |    0 |        8 |        9 |  8 |
+|-------+------+------+----------+----------+----|
+|     8 |   44 |    0 |        9 |        5 |  3 |
+|     9 |   45 |    0 |       10 |        5 |  4 |
+|    10 |   46 |    0 |       11 |       15 |  8 |
+|    11 |   47 |    0 |       12 |       45 | 32 |
+|    12 |   48 |    7 |       13 |        8 |  5 |
+|    13 |   49 |    7 |       14 |        5 |  3 |
+|    14 |   50 |    7 |       15 |        4 |  3 |
+|    15 |   51 |    7 |       16 |          |    |
+|-------+------+------+----------+----------+----|
+|    16 |   60 |    0 |        2 |        1 |  1 |
+|    17 |   61 |    0 |        3 |        3 |  2 |
+|    18 |   62 |    0 |        4 |        5 |  4 |
+|    19 |   63 |    0 |        5 |        7 |  4 |
+|    20 |   56 |    0 |        6 |        9 |  8 |
+|    21 |   57 |    0 |        7 |       11 |  8 |
+|    22 |   58 |    0 |        8 |       13 |  8 |
+|    23 |   59 |    0 |        9 |       15 |  8 |
+|-------+------+------+----------+----------+----|
+|    24 |   52 |    0 |       10 |        1 |  1 |
+|    25 |   53 |    0 |       11 |       81 | 80 |
+|    26 |   54 |    0 |       12 |       64 | 63 |
+|    27 |   55 |    0 |       13 |        8 |  5 |
+|    28 |      |    0 |       14 |        5 |  3 |
+|    29 |      |    0 |       15 |        4 |  3 |
+|    30 |      |    0 |       16 |          |    |
+|    31 |      |    0 |       16 |          |    |
+|-------+------+------+----------+----------+----|
+
+
+
