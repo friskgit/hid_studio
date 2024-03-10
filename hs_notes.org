@@ -26,9 +26,12 @@ Free function
 #+end_src
 
 #+begin_src sclang :results none
-  s.options.numOutputBusChannels = 16;
+s.options.numOutputBusChannels = 16;
 #+end_src
 
+#+begin_src sclang :results none
+  s.meter;
+#+end_src
 Main function that loads all other functions. Takes midi input and process it accordingly. Uses the pitches from the table [[*pitches][pitches]] 
 #+name: midi_ctrl
 #+begin_src sclang :results none :noweb yes  :var tab=tab_notes
@@ -45,50 +48,57 @@ Main function that loads all other functions. Takes midi input and process it ac
   MIDIIn.connectAll;
   MIDIIn.connect;    // init for one port midi interface
 
+  // channels
+  ~outputs = 16;
+  //  s.options.numOutputBusChannels = ~channels;
   // arrays
   ~tuneup = Array.new(24);
   ~synths = Array.new(48);
   ~crnt = Array.new(16);
 
   ~noteOff = { arg src, chan, num, vel;
-    	//  	[chan,num,vel / 127].postln;
+  	//  	[chan,num,vel / 127].postln;
   };
 
   ~noteOn = { arg src, chan, num, vel;
-  	"noteon: ".post;
-    	[chan,num,vel / 127].postln;
-    	if(chan == 4, 
-  		{
-  			if( ~update_crnt.value(num) == 0,
-  				{
-  					~play_tune.value(num);
-  					~crnt.add(num);
-  				}, {
-  					~tuner_set.value(num, \gate, 0);
-  				}
-  			);
-  		});
+  	if(chan == 4, 
+    		{
+    			if( ~update_crnt.value(num) == 0,
+    				{
+    					~play_tune.value(num);
+    					~crnt.add(num);
+  					"noteon: ".post;
+  					[num].postln;
+  					"------------".postln;
+    				}, {
+    					~tuner_set.value(num, \gate, 0);
+  					"noteoff: ".post;
+  					[num].postln;
+  					"------------".postln;
+    				}
+    			);
+    		});
   };
 
   ~control = { arg src, chan, num, val;
-  	"control: ".post;
-    	[chan,num,val].postln;
-  	// this is the button control
-  	if(chan == 0,
-    		{
-  			if(val > 0,
-  				{
-  					~play_note.value(num)
-  				}, {
-  					~setter.value(num, \gate, 0)
-  				}
-    			);
-    		});
-    	// for push buttons
-  	if(chan == 4,
-    		{
-    			~tuner.value(num, \freq, val);
-    		});
+    	// "control: ".post;
+  	// [chan,num,val].postln;
+    	// this is the button control
+    	if(chan == 0,
+  		{
+    			if(val > 0,
+    				{
+    					~play_note.value(num)
+    				}, {
+    					~setter.value(num, \gate, 0)
+    				}
+  			);
+  		});
+  	// for push buttons
+    	if(chan == 4,
+  		{
+  			~tuner.value(num, \freq, val);
+  		});
   };
 
   MIDIIn.addFuncTo(\noteOn, ~noteOn);
@@ -104,17 +114,18 @@ Main function that loads all other functions. Takes midi input and process it ac
 #+name: check_active_synth
 #+begin_src sclang :results none
   ~update_crnt = { arg id;
-  	var res = 0;
-  	~crnt.do({ arg item, i;
-    		if(item == id,
-  			{"found".postln;
-  				~crnt.postln;
-  				~crnt.removeAt(i);
-  				res = -1;},
-  			{}
-  		);
-    	});
-  	res;
+    	var res = 0;
+    	~crnt.do({ arg item, i;
+  		if(item == id,
+    			{
+  				// "found".postln;
+    				// ~crnt.postln;
+    				~crnt.removeAt(i);
+    				res = -1;},
+    			{}
+    		);
+  	});
+    	res;
   };
  #+end_src
 
@@ -123,15 +134,16 @@ Function to start a synth at the ratio specified by the table lookup.
 #+begin_src sclang :results none :noweb yes :var tab=tab_notes
   <<lookup>>
   ~play_note = { arg val=0;
-  	var index = val, fund  = 60, ratio = 1/1, freq = ~main_root, ch = val-32;
-  	ratio = ~find_row.value(index)[3];
-  	fund = fund + ~find_row.value(index)[1];
-  	freq = ratio * (fund.midicps);
-  	"lookup gives: ".post; ~find_row.value(index).postln;
-  	"index is: ".post; index.postln;
-  	"ratio is: ".post; ratio.postln;
-  	"freq is: ".post; freq.postln;
-  	~synths.add(Synth.new(\osc, [\root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
+    	var index = val, fund  = 60, ratio = 1/1, freq = ~main_root, ch = val-32;
+    	ratio = ~find_row.value(index)[3];
+    	fund = fund + ~find_row.value(index)[1];
+    	freq = ratio * (fund.midicps);
+    	"lookup gives: ".post; ~find_row.value(index).postln;
+    	// "channel is: ".post; ch.postln;
+  	// "index is: ".post; index.postln;
+    	// "ratio is: ".post; ratio.postln;
+    	// "freq is: ".post; freq.postln;
+    	~synths.add(Synth.new(\osc, [\out, ch, \root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
   };
 
 #+end_src
@@ -145,15 +157,16 @@ Function to start a tunable synth at the ratio specified by the table lookup.
 #+begin_src sclang :results none :noweb yes :var tab=tab_notes
   <<tune_adjust_function>>
   ~play_tune = { arg val=0;
-  	var index = val, fund = 60, ratio = 1/1, freq = ~main_root;
+  	var index = val, fund = 60, ratio = 1/1, freq = ~main_root, ch = val-32;
   	ratio = ~find_row.value(index)[3];
   	fund = fund + ~find_row.value(index)[1];
   	freq = ratio * (fund.midicps);
   	"find_row gives: ".post; ~find_row.value(index).postln;
-  	"index is: ".post; index.postln;
-  	"ratio is: ".post; ratio.postln;
-  	"freq is: ".post; freq.postln;
-  	~tuneup.add(Synth.new(\osc, [\root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
+  	// "channel is: ".post; ch.postln;
+  	// "index is: ".post; index.postln;
+  	// "ratio is: ".post; ratio.postln;
+  	// "freq is: ".post; freq.postln;
+  	~tuneup.add(Synth.new(\osc, [\out, ch, \root, fund, \freq, freq, \amplitude, 0.3 , \gate, 1, \index, val]));
   };
 
 #+end_src
@@ -713,3 +726,162 @@ index is: 46
 ratio is: 1.2
 freq is: 313.95067836072
 Recording Stopped: (SC_240123_211414.wav)
+
+** recording 3
+
+find_row gives: [ 39, 0, 4, 1.3125 ]
+noteon: [ 39 ]
+------------
+find_row gives: [ 40, 0, 5, 1.3333333333333 ]
+noteon: [ 40 ]
+------------
+find_row gives: [ 42, 0, 7, 1.5 ]
+noteon: [ 42 ]
+------------
+noteoff: [ 40 ]
+------------
+find_row gives: [ 34, 0, 3, 1.875 ]
+noteon: [ 34 ]
+------------
+noteoff: [ 39 ]
+------------
+find_row gives: [ 38, 0, 3, 1.75 ]
+noteon: [ 38 ]
+------------
+noteoff: [ 42 ]
+------------
+noteoff: [ 34 ]
+------------
+find_row gives: [ 39, 0, 4, 1.3125 ]
+noteon: [ 39 ]
+------------
+find_row gives: [ 34, 0, 3, 1.875 ]
+noteon: [ 34 ]
+------------
+find_row gives: [ 40, 0, 5, 1.3333333333333 ]
+noteon: [ 40 ]
+------------
+find_row gives: [ 42, 0, 7, 1.5 ]
+noteon: [ 42 ]
+------------
+noteoff: [ 38 ]
+------------
+noteoff: [ 42 ]
+------------
+noteoff: [ 39 ]
+------------
+find_row gives: [ 39, 0, 4, 1.3125 ]
+noteon: [ 39 ]
+------------
+noteoff: [ 40 ]
+------------
+find_row gives: [ 40, 0, 5, 1.3333333333333 ]
+noteon: [ 40 ]
+------------
+find_row gives: [ 47, 0, 12, 1.8 ]
+noteon: [ 47 ]
+------------
+noteoff: [ 39 ]
+------------
+noteoff: [ 34 ]
+------------
+find_row gives: [ 33, 0, 2, 1.25 ]
+noteon: [ 33 ]
+------------
+noteoff: [ 33 ]
+------------
+find_row gives: [ 33, 0, 2, 1.25 ]
+noteon: [ 33 ]
+------------
+noteoff: [ 33 ]
+------------
+find_row gives: [ 32, 0, 1, 1.6666666666667 ]
+noteon: [ 32 ]
+------------
+find_row gives: [ 33, 0, 2, 1.25 ]
+noteon: [ 33 ]
+------------
+noteoff: [ 33 ]
+------------
+noteoff: [ 32 ]
+------------
+noteoff: [ 40 ]
+------------
+find_row gives: [ 43, 0, 8, 1.125 ]
+noteon: [ 43 ]
+------------
+find_row gives: [ 36, 0, 1, 2.0 ]
+noteon: [ 36 ]
+------------
+find_row gives: [ 39, 0, 4, 1.3125 ]
+noteon: [ 39 ]
+------------
+noteoff: [ 47 ]
+------------
+find_row gives: [ 45, 0, 10, 1.6 ]
+noteon: [ 45 ]
+------------
+noteoff: [ 36 ]
+------------
+find_row gives: [ 38, 0, 3, 1.75 ]
+noteon: [ 38 ]
+------------
+noteoff: [ 38 ]
+------------
+find_row gives: [ 34, 0, 3, 1.875 ]
+noteon: [ 34 ]
+------------
+find_row gives: [ 32, 0, 1, 1.6666666666667 ]
+noteon: [ 32 ]
+------------
+noteoff: [ 34 ]
+------------
+find_row gives: [ 34, 0, 3, 1.875 ]
+noteon: [ 34 ]
+------------
+noteoff: [ 34 ]
+------------
+noteoff: [ 43 ]
+------------
+noteoff: [ 45 ]
+------------
+noteoff: [ 32 ]
+------------
+find_row gives: [ 41, 0, 6, 1.0 ]
+noteon: [ 41 ]
+------------
+find_row gives: [ 34, 0, 3, 1.875 ]
+noteon: [ 34 ]
+------------
+find_row gives: [ 38, 0, 3, 1.75 ]
+noteon: [ 38 ]
+------------
+noteoff: [ 41 ]
+------------
+noteoff: [ 34 ]
+------------
+noteoff: [ 38 ]
+------------
+find_row gives: [ 42, 0, 7, 1.5 ]
+noteon: [ 42 ]
+------------
+find_row gives: [ 40, 0, 5, 1.3333333333333 ]
+noteon: [ 40 ]
+------------
+find_row gives: [ 41, 0, 6, 1.0 ]
+noteon: [ 41 ]
+------------
+find_row gives: [ 43, 0, 8, 1.125 ]
+noteon: [ 43 ]
+------------
+noteoff: [ 39 ]
+------------
+noteoff: [ 40 ]
+------------
+noteoff: [ 42 ]
+------------
+noteoff: [ 41 ]
+------------
+noteoff: [ 43 ]
+------------
+
