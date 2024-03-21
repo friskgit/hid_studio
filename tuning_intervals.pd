@@ -1,4 +1,4 @@
-#N canvas 130 69 1233 1103 12;
+#N canvas 43 38 1622 1009 12;
 #X obj 613 491 *~ 0.3;
 #X obj 764 801 dac~;
 #X floatatom 613 417 5 0 0 0 - - - 0;
@@ -63,7 +63,7 @@
 #X obj 265 795 t b f;
 #X msg 104 918 C;
 #X msg 104 887 set \$1;
-#X msg 263 920 F;
+#X msg 263 920 C;
 #X msg 263 889 set \$1;
 #X msg 417 24 7 8;
 #X msg 97 349 list C Cis D Dis E F Fis G Gis A Ais B;
@@ -137,12 +137,12 @@
 #X msg 574 1046 1000;
 #X msg 459 925 0 \, 0.3 3;
 #X msg 461 1011 0 50;
-#X obj 756 956 -;
-#X floatatom 756 986 10 0 0 0 - - - 0;
-#X obj 756 1014 t b f;
-#X obj 755 1080 /;
-#X floatatom 754 1111 5 0 0 0 - - - 0;
-#X msg 755 1046 1000;
+#X obj 847 736 -;
+#X floatatom 847 766 10 0 0 0 - - - 0;
+#X obj 847 794 t b f;
+#X obj 846 860 /;
+#X floatatom 845 891 5 0 0 0 - - - 0;
+#X msg 846 826 1000;
 #X text 231 983 play the beating pulse;
 #X msg 806 27 3 2;
 #X msg 1117 31 3 2;
@@ -151,7 +151,7 @@
 #X text 926 27 perfect fifth;
 #X text 932 -56 major third;
 #X text 503 1137 between root an tone;
-#X text 748 1137 between intervals;
+#X text 839 917 between intervals;
 #X msg 808 110 2 1;
 #X msg 345 241 60;
 #X obj 346 207 loadbang;
@@ -283,7 +283,7 @@
 #X connect 98 0 17 0;
 #X connect 99 0 4 0;
 #X connect 100 0 101 0;
-#X connect 100 0 137 1;
+#X connect 100 0 137 0;
 #X connect 101 0 99 0;
 #X connect 102 0 103 0;
 #X connect 102 1 103 1;
@@ -352,6 +352,7 @@
 #X connect 170 0 8 0;
 #X connect 171 0 184 0;
 #X connect 172 0 173 0;
+#X connect 172 0 137 1;
 #X connect 173 0 171 0;
 #X connect 174 0 175 0;
 #X connect 174 1 175 1;

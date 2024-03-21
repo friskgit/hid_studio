@@ -3,7 +3,18 @@
 # #+PROPERTY: header-args: :noweb yes :exports results
 
 * main
-** using commas
+** contents of this file
+*** [[*sound][sound]]
+Various piece of code to generate sound.
+**** [[*scsynth][scsynth]]
+SuperCollider file to play various layouts of scales defined in the file [[*pitches][pitches]]
+**** [[*pitches][pitches]]
+Tables with various layouts of scales.
+*** [[*using commas][using commas]]
+Self explanatory
+*** [[*recordings][recordings]]
+Notes to various recording made with [[*scsynth][scsynth]] to generate material for the paper Sound Intuition for Journal of sound studies.
+* using commas
 - 5: one syntonic comma is 81/80 or 21.5 cents
 - 7: one septimal comma is 64/43 or 27.3 cents
 - 11: approximated to one undecimal quartertone (Richard H. Stein) 33/32 or 53.3 cents
@@ -12,9 +23,9 @@
 
   1/1 81/80 
 
-* scsynth
 
-* Sound
+* sound
+** scsynth
   Load ~midi_ctrl~ and play with the preset in the table, or create a new table.
 
 Free function
@@ -354,27 +365,35 @@ First column is an index, second is the root of the input signal (MIDI), third i
 
 See [cite:@Tenney2008, p 11] bottom grid.
 #+name: tab_notes
-| index | BU16 | root | harmonic | 5- limit |    |
-|       |      |      |   series |        N |  D |
-|-------+------+------+----------+----------+----|
-|     0 |   32 |    0 |        1 |        5 |  3 |
-|     1 |   33 |    0 |        2 |        5 |  4 |
-|     2 |   34 |    0 |        3 |       15 |  8 |
-|     3 |   35 |    0 |        4 |       45 | 32 |
-|     4 |   36 |    0 |        1 |        2 |  1 |
-|     5 |   37 |    0 |        2 |        8 |  3 |
-|     6 |   38 |    0 |        3 |        7 |  4 |
-|     7 |   39 |    0 |        4 |       21 | 16 |
-|-------+------+------+----------+----------+----|
-|     8 |   40 |    0 |        5 |        4 |  3 |
-|     9 |   41 |    0 |        6 |        1 |  1 |
-|    10 |   42 |    0 |        7 |        3 |  2 |
-|    11 |   43 |    0 |        8 |        9 |  8 |
-|    12 |   44 |    0 |        9 |       16 | 15 |
-|    13 |   45 |    0 |       10 |        8 |  5 |
-|    14 |   46 |    0 |       11 |        6 |  5 |
-|    15 |   47 |    0 |       12 |        9 | 5  |
-|-------+------+------+----------+----------+----|
+| index | BU16 | root | harmonic | 5- limit |    |       200 |
+|       |      |      |   series |        N |  D |      freq |
+|-------+------+------+----------+----------+----+-----------|
+|     0 |   32 |    0 |        1 |        5 |  3 |    333.33 |
+|     1 |   33 |    0 |        2 |        5 |  4 |    250.00 |
+|     2 |   34 |    0 |        3 |       15 |  8 |    375.00 |
+|     3 |   35 |    0 |        4 |       45 | 32 |    281.25 |
+|     4 |   36 |    0 |        1 |        2 |  1 |    400.00 |
+|     5 |   37 |    0 |        2 |        8 |  3 |    533.33 |
+|     6 |   38 |    0 |        3 |        7 |  4 |    350.00 |
+|     7 |   39 |    0 |        4 |       21 | 16 |    262.50 |
+|-------+------+------+----------+----------+----+-----------|
+|     8 |   40 |    0 |        5 |        4 |  3 |    266.67 |
+|     9 |   41 |    0 |        6 |        1 |  1 |    200.00 |
+|    10 |   42 |    0 |        7 |        3 |  2 |    300.00 |
+|    11 |   43 |    0 |        8 |        9 |  8 |    225.00 |
+|    12 |   44 |    0 |        9 |       16 | 15 |    213.33 |
+|    13 |   45 |    0 |       10 |        8 |  5 |    320.00 |
+|    14 |   46 |    0 |       11 |        6 |  5 |    240.00 |
+|    15 |   47 |    0 |       12 |        9 |  5 |    360.00 |
+|-------+------+------+----------+----------+----+-----------|
+#+TBLFM: $7=@1$7*($5/$6);%.2f
+
+#+begin_src shell :var notes=tab_notes
+  echo notes
+#+end_src
+
+#+RESULTS:
+: notes
 
 Beatings. See also [[file:tuning_intervals.pd][tuning_intervals]]  pd patch 7-limit beating patterns on 4/3.
 #+name: tab_notes_fourth
@@ -401,7 +420,7 @@ Beatings. See also [[file:tuning_intervals.pd][tuning_intervals]]  pd patch 7-li
 |    14 |   46 |    0 |       11 |       98 | 75 |
 |    15 |   47 |    0 |       12 |       75 | 56 |
 |-------+------+------+----------+----------+----|
-* Recordings
+* recordings
 ** recording 1
 Beatings table 7-limit beating patterns
 Preparing recording on 'localhost'
