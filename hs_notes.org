@@ -23,6 +23,35 @@ Notes to various recording made with [[*scsynth][scsynth]] to generate material 
 
   1/1 81/80 
 
+  One syntonic comme time between each beet
+  #+begin_src calc
+    (100 / 21.5)
+  #+end_src
+
+  #+RESULTS:
+  : 4.6511627907
+
+  bsept4 against perf 4, one syntonic comma given that root 220
+  #+begin_src calc :var tmp=220
+    ((21/16 * tmp) - (4/3 * tmp)) * 1000
+  #+end_src
+
+  #+RESULTS:
+  : -0.0946969697
+
+  #+begin_src scheme :results value :var tmp=220
+    (/ 1000 (exact->inexact (- (* (/ 4 3) tmp) (* (/ 21 16) tmp))))
+  #+end_src
+
+  #+RESULTS:
+  : 218.1818181818182
+
+    #+begin_src scheme :results value :var tmp=220
+    (- 4/3 21/16)
+  #+end_src
+
+  #+RESULTS:
+  : 1/48
 
 * sound
 ** scsynth
