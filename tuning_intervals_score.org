@@ -1,0 +1,81 @@
+#+TITLE:     HP2300 supercollider interface
+#+EMAIL:     mail@henrikfrisk.com
+#+DATE:      [2024-05-13 Mon]
+#+DESCRIPTION: Simple synth for testing the various intervals of the piece.
+#+KEYWORDS:
+#+STARTUP: indent overview
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+
+* HP23000 test interface
+Main function that starts the gui:
+#+call: play_gui()
+
+Test function
+#+call: test_play()
+
+SynthDef for a very simple tone generator
+#+begin_src sclang :results none
+  SynthDef("waver", { |out=0, freq=261.1, amp=0.3, length=3 |
+  	var snd, env;
+  	env = Env.new(levels: [0, 1, 0.9, 0], times: [0.01, 0.8*length, 1], curve: [-3, 1, 2, -2]);
+  	snd = SinOsc.ar(freq, 0.0, amp, 0.0);
+  	snd = snd * EnvGen.kr(env, doneAction: Done.freeSelf);
+    	Out.ar(out, snd);
+  }).add;
+#+end_src
+
+Play function
+#+name: play_func
+#+begin_src sclang :results none
+  ~playInterval = { arg i1, i2, len;
+  	var pair, base = 261.1;
+  	pair = [i1*base, i2*base];
+
+  	fork {
+  		[\freq, pair, \amp, 0.1, \length, len].flop.do { |args|
+  			args.postln;
+      		a = Synth("waver", args);
+  			0.01.wait;
+  		}
+  	};
+  };
+#+end_src
+
+Test call for the [[play_func][play function]]
+#+name: test_play
+#+begin_src sclang :results none
+  ~playInterval.value(5/4, 2/1, 7);
+#+end_src
+
+GUI for playing the intervals and controlling a few parameters of the playback.
+#+name: play_gui
+#+begin_src sclang :results none
+  var i1, i2, i3, i4, i5, i6, s1, numLen, len;
+  w = Window.new("HP2300", Rect(200,200,255,100));
+  StaticText.new(w,Rect(40,20,100,30)).string_("Intervals");
+  i1 = Button.new(w,Rect(10,60,100,30)).states_([["32/25 5/4"]]);
+  i1.mouseDownAction = { ~playInterval.value(32/25, 5/4, len); };
+  i2 = Button.new(w,Rect(10,100,100,30)).states_([["8/5 25/16"]]);
+  i2.mouseDownAction = { ~playInterval.value(8/5, 25/16, len); };
+  i3 = Button.new(w,Rect(10,140,100,30)).states_([["64/49 5/4"]]);
+  i3.mouseDownAction = { ~playInterval.value(64/49, 5/4, len); };
+  i4 = Button.new(w,Rect(10,180,100,30)).states_([["25/16 49/32"]]);
+  i4.mouseDownAction = { ~playInterval.value(25/16, 49/32, len); };
+  i5 = Button.new(w,Rect(10,220,100,30)).states_([["8/7 35/32"]]);
+  i5.mouseDownAction = { ~playInterval.value(8/7, 35/32, len); };
+  i6 = Button.new(w,Rect(10,260,100,30)).states_([["2/1 40/21"]]);
+  i6.mouseDownAction = { ~playInterval.value(2/1, 40/21, len); };
+  StaticText.new(w,Rect(160,20,100,30)).string_("Length");
+  numLen = NumberBox(w, Rect(160, 60, 60, 20));
+  s1 = Slider(w, Rect(160, 100, 20, 150)).background_(Color.white(alpha:0.2)).action_({
+  	numLen.value_(s1.value * 10);
+    	len = s1.value * 10;
+  });
+  s1.action.value;
+  w.front;
+#+end_src
+
+#+ATTR_HTML: :width 400
+[[file:img/simple_gui.png]]
