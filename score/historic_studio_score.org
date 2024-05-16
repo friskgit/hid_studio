@@ -69,6 +69,24 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   }
 #+end_src
 
+#+name: main_funct_single_drum
+#+begin_src lilypond :tangle ./output/score_excerpt_2.ly :file output/score_excerpt_2.png
+  \score {
+    <<
+      \new DrumStaff \with {
+%        \remove Bar_engraver
+        drumStyleTable = #percussion-style
+        \override StaffSymbol.line-count = #1
+      } \drummode {
+  				%      \tempo 4 = 78
+        \clef percussion 
+        \perc-music
+      }
+    >>
+    \layout{}
+  }
+#+end_src
+
 
 ** drum staff
 :PROPERTIES:
@@ -728,32 +746,51 @@ Time for the second section based on:
       \relative c' {
         \mark \markup \sans "[8.79'']"
         <
-    	fubb
-    	euaa
-        >1\fermata
+    	fubb\laissezVibrer
+    	euaa\laissezVibrer
+        >1
         ^\markup \mysans "64/49"
         ^\markup \nobox "(-38)"
         _\markup \mysans "32/25"
-        _\markup \nobox "(27)"      
+        _\markup \nobox "(27)"
+        \> s4 s4\!
       }
     }
     perc-music = {
       \relative c {
         \override Score.NonMusicalPaperColumn.padding = #3
         \override TupletNumber.text = #tuplet-number::calc-fraction-text
-        \tuplet 6/8 {
-  	\override NoteHead.style = #'triangle
-  	a16 a a a a a
-        }
-        \tuplet 6/8 {
-  	\override NoteHead.style = #'triangle
-  	a a a a a a \bar ":|.|:"
-        }
+        \override NoteHead.style = #'triangle
+        \time 6/4 a8. a8. a8. a8. a8. a8. a8. a8. \bar ":|."
       }
     }
     <<main_funct_two_staffs>>
 #+end_src
 
-#+RESULTS: section_two
-[[file:output/section_2.png]]
+#+RESULTS: section_two_with_beat
+[[file:output/section_2_beat.png]]
 
+*** rhythm 32/25 agains 5/4
+
+#+name: section_two_added_beat
+#+begin_src lilypond :file output/section_2_beat_2.png :tangle output/section_2_beat_2.ly
+  <<stuff>>
+    perc-music = {
+      \relative c {
+        \override Score.NonMusicalPaperColumn.padding = #3
+        \override TupletNumber.text = #tuplet-number::calc-fraction-text
+        \tuplet 6/8 {
+  	\override NoteHead.style = #'triangle
+  	a16\< a a a a a
+        }
+        \tuplet 6/8 {
+  	\override NoteHead.style = #'triangle
+  	a a a a a a \! \bar ":|." 
+        }
+      }
+    }
+    <<main_funct_single_drum>>
+#+end_src
+
+#+RESULTS: section_two_added_beat
+[[file:output/section_2_beat_2.png]]

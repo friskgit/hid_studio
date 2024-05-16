@@ -18,27 +18,22 @@
     \relative c' {
       \mark \markup \sans "[8.79'']"
       <
-  	fubb
-  	euaa
-      >1\fermata
+  	fubb\laissezVibrer
+  	euaa\laissezVibrer
+      >1
       ^\markup \mysans "64/49"
       ^\markup \nobox "(-38)"
       _\markup \mysans "32/25"
-      _\markup \nobox "(27)"      
+      _\markup \nobox "(27)"
+      \> s4 s4\!
     }
   }
   perc-music = {
     \relative c {
       \override Score.NonMusicalPaperColumn.padding = #3
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
-      \tuplet 6/8 {
-	\override NoteHead.style = #'triangle
-	a16 a a a a a
-      }
-      \tuplet 6/8 {
-	\override NoteHead.style = #'triangle
-	a a a a a a \bar ":|.|:"
-      }
+      \override NoteHead.style = #'triangle
+      \time 6/4 a8. a8. a8. a8. a8. a8. a8. a8. \bar ":|."
     }
   }
     \score {

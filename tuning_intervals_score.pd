@@ -1,4 +1,4 @@
-#N canvas 818 90 1730 985 12;
+#N canvas 70 90 1730 985 12;
 #X text 515 403 root frequency;
 #X obj 372 365 unpack;
 #X obj 371 397 t b b f;
@@ -270,7 +270,7 @@
 #X obj 531 797 osc~ 800;
 #X obj 257 176 s root_freq;
 #X floatatom 539 513 5 0 0 0 - - - 0;
-#N canvas 137 465 450 454 seven_five_limit 1;
+#N canvas 100 526 450 495 seven_five_limit 1;
 #X msg 94 52 5 4;
 #X msg 237 52 5 4;
 #X obj 48 385 s pitchesA;
@@ -320,7 +320,7 @@
 #X obj 349 198 bng 19 250 50 0 empty empty empty 0 -10 0 12 #fcfcfc #000000 #000000;
 #X obj 349 219 bng 19 250 50 0 empty empty empty 0 -10 0 12 #fcfcfc #000000 #000000;
 #X obj 349 240 bng 19 250 50 0 empty empty empty 0 -10 0 12 #fcfcfc #000000 #000000;
-#X obj 165 27 r one;
+#X obj 165 28 r one;
 #X obj 165 50 r two;
 #X text 64 30 3;
 #X text 63 53 4;

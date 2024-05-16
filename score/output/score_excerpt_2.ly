@@ -26,3 +26,18 @@
     >>
     \layout{}
   }
+
+\score {
+    <<
+      \new DrumStaff \with {
+%        \remove Bar_engraver
+        drumStyleTable = #percussion-style
+        \override StaffSymbol.line-count = #1
+      } \drummode {
+  				%      \tempo 4 = 78
+        \clef percussion 
+        \perc-music
+      }
+    >>
+    \layout{}
+  }

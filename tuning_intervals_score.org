@@ -16,6 +16,7 @@ Test function
 #+call: test_play()
 
 SynthDef for a very simple tone generator
+#+name: synth_waver
 #+begin_src sclang :results none
   SynthDef("waver", { |out=0, freq=261.1, amp=0.3, length=3 |
   	var snd, env;
@@ -51,7 +52,7 @@ Test call for the [[play_func][play function]]
 
 GUI for playing the intervals and controlling a few parameters of the playback.
 #+name: play_gui
-#+begin_src sclang :results none
+#+begin_src sclang :results none :noweb yes
   var i1, i2, i3, i4, i5, i6, s1, numLen, len;
   w = Window.new("HP2300", Rect(200,200,255,100));
   StaticText.new(w,Rect(40,20,100,30)).string_("Intervals");
@@ -75,6 +76,9 @@ GUI for playing the intervals and controlling a few parameters of the playback.
   });
   s1.action.value;
   w.front;
+
+  <<synth_waver>>
+  <<play_func>>
 #+end_src
 
 #+ATTR_HTML: :width 400
