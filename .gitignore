@@ -1,1 +1,10 @@
+*~
+*.svg
 *.midi
+*.dsp.cpp
+*.m
+*.aup3
+*.wav
+/score/output/score_tangle.ly~
+/score/output
+/recordings
