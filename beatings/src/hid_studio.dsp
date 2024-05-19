@@ -1,6 +1,6 @@
-// -*- compile-command: "cd .. && make jack src=src/source.dsp && cd -"; -*-
+// -*- compile-command: "cd .. && make jack src=src/hid_studio.dsp && cd -"; -*-
 
-declare name	"beatings";
+declare name	"Tuning app for HID studio";
 declare version " 0.1 ";
 declare author " Henrik Frisk " ;
 declare license " BSD ";
@@ -17,99 +17,107 @@ declare copyright "(c) dinergy 2024 ";
 import("stdfaust.lib");
 
 
-rfrq = hslider("root", 261.1, 60, 12000, 0.1) : si.smoo;
-// intervals
-a = rfrq * (1/1);
-b = rfrq * (5/4);
-c = rfrq * (8/5);
-d = rfrq * (25/16);
-e = rfrq : *(32/25);
-f = rfrq : *(7/4);
-e = rfrq : *(8/7);
-f = rfrq : *(49/32);
-g = rfrq : *(64/49);
-h = rfrq : *(7/5);
-i = rfrq : *(35/32);
-j = rfrq : *(40/21);
-k = rfrq : *(64/35);
-	   
+rfrq = 261.6;
 
-// Beatings time
-ra = e - b;
-rb = c - d;
-rc = g - b;
-rd = d - f;
-b_sept4_perf4 = septimal_subfourth - just_perf_fourth;
-b_marv4_just4 = marvelous_fourth - just_perf_fourth;
-b_sept4_marv4 = septimal_subfourth - marvelous_fourth;
-b_bizougo5_perf5 = bizougo_fifth - just_perfect_fifth;
-b_marv4_bizougo5 = bizougo_fifth - marvelous_fourth;
-b_maj3_septsub4 = just_major_third - septimal_subfourth;
+// Scale steps
+a = rfrq, (1, 1 : /) : *;
+b = rfrq, (5, 4 : /) : *;
+c = rfrq, (8, 5 : /) : *;
+d = rfrq, (25, 16 : /) : *;
+e = rfrq, (32, 25 : /) : *;
+f = rfrq, (7, 4 : /) : *;
+g = rfrq, (8, 7 : /) : *;
+h = rfrq, (49, 32 : /) : *;
+i = rfrq, (64, 49 : /) : *;
+j = rfrq, (7, 5 : /) : *;
+k = rfrq, (35, 32 : /) : *;
+l = rfrq, (40, 21 : /) : *;
+m = rfrq, (64, 35 : /) : *;
+n = rfrq, (2, 1 : /) : *;
 
+// Beating tempos
+rhythm_a = e - b;
+rhythm_b = c - d;
+rhythm_c = i - b;
+rhythm_d = d - h;
+rhythm_e = i - e;
+rhythm_f = g - k;
 
-sig_group(x) = hgroup("Oscillators", x);
+sig_group_a(x) = hgroup("[0]scale steps", x);
+sig_group_b(x) = hgroup("[1]", x);
+sig_group_c(x) = hgroup("[2]", x);
+
 // 1, 2, 4, 8, 16
-check1 = sig_group(checkbox("1/1"));
-check2 = sig_group(checkbox("75/56"));
-check3 = sig_group(checkbox("98/75"));
-check4 = sig_group(checkbox("5/3"));
-check5 = sig_group(checkbox("5/4"));
-check6 = sig_group(checkbox("4/3"));
-check7 = sig_group(checkbox("15/8"));
-check8 = sig_group(checkbox("21/16"));
-check9 = sig_group(checkbox("7/4"));
-check10 = sig_group(checkbox("3/2"));
+check1 = sig_group_a(checkbox("[0]1/1"));
+check2 = sig_group_a(checkbox("[1]5/4"));
+check3 = sig_group_a(checkbox("[2]8/5"));
+check4 = sig_group_a(checkbox("[3]25/16"));
+check5 = sig_group_a(checkbox("[4]32/25"));
+check6 = sig_group_b(checkbox("[5]7/4"));
+check7 = sig_group_b(checkbox("[6]8/7"));
+check8 = sig_group_b(checkbox("[7]49/32"));
+check9 = sig_group_b(checkbox("[8]64/49"));
+check10 = sig_group_b(checkbox("[9]7/5"));
+check11 = sig_group_c(checkbox("[0]35/32"));
+check12 = sig_group_c(checkbox("[1]40/21"));
+check13 = sig_group_c(checkbox("[2]64/35"));
+check14 = sig_group_c(checkbox("[3]2/1"));
 
-beat_group(x) = hgroup("Beats", x);
-// 1, 2, 4, 8, 16
-beat1 = beat_group(checkbox("21/16 - 4/3"));
-beat2 = beat_group(checkbox("75/56 - 4/3"));
-beat3 = beat_group(checkbox("75/56 - 21/16"));
-beat4 = beat_group(checkbox("98/75 - 3/2"));
-beat5 = beat_group(checkbox("75/56 - 98/75"));
-beat6 = beat_group(checkbox("5/4 - 21/16"));
+beat_group(x) = hgroup("[3]beatings", x);
+beat1 = beat_group(checkbox("[0]32/25 - 5/4"));
+beat2 = beat_group(checkbox("[1]8/5 - 25/16"));
+beat3 = beat_group(checkbox("[2]64/49 - 5/4"));
+beat4 = beat_group(checkbox("[3]25/16 - 49/32"));
+beat5 = beat_group(checkbox("[4]64/49 - 32/25"));
+beat6 = beat_group(checkbox("[5]8/7 - 35/32"));
 
-osc0 = os.osc(261.1) * check1 : si.smoo;
-osc1 = os.osc(marvelous_fourth) * check2 : si.smoo;
-osc2 = os.osc(bizougo_fifth) * check3 : si.smoo;
-osc3 = os.osc(just_major_sixt) * check4 : si.smoo;
-osc4 = os.osc(just_major_third) * check5 : si.smoo;
-osc5 = os.osc(just_perf_fourth) * check6 : si.smoo;
-osc6 = os.osc(just_major_seven) * check7 : si.smoo;
-osc7 = os.osc(septimal_subfourth) * check8 : si.smoo;
-osc8 = os.osc(harmonic_seven) * check9 : si.smoo;
-osc9 = os.osc(just_perfect_fifth) * check10 : si.smoo;
+// osc0 = os.osc(rfrq) : si.smoo;
+osc1 = os.osc(a) * check1 : si.smoo;
+osc2 = os.osc(b) * check2 : si.smoo;
+osc3 = os.osc(c) * check3 : si.smoo;
+osc4 = os.osc(d) * check4 : si.smoo;
+osc5 = os.osc(e) * check5 : si.smoo;
+osc6 = os.osc(f) * check6 : si.smoo;
+osc7 = os.osc(g) * check7 : si.smoo;
+osc8 = os.osc(h) * check8 : si.smoo;
+osc9 = os.osc(i) * check9 : si.smoo;
+osc10 = os.osc(j) * check10 : si.smoo;
+osc11 = os.osc(k) * check11 : si.smoo;
+osc12 = os.osc(l) * check12 : si.smoo;
+osc13 = os.osc(m) * check13 : si.smoo;
+osc14 = os.osc(n) * check14 : si.smoo;
 
-vol = hslider("gain", 0.2, 0.0, 1.0, 0.001) : si.smoo;
-// osc1 = os.osc(marvelous_fourth);
-// osc2 = os.osc(bizougo_fifth);
-drumfrq = hslider("drum_frq", 100, 20, 10000, 1);
+vol = hslider("[5]gain", 0.2, 0.0, 1.0, 0.001) : si.smoo;
 
-baseb1 = ba.tempo(b_sept4_perf4*60);
+drumfrq = hslider("[4]drum frequency", 100, 20, 10000, 1);
+
+baseb1 = ba.tempo(rhythm_a*60);
 p1 = ba.pulse(baseb1);
 hit1 = sy.popFilterDrum(drumfrq, 5, p1) * beat1;
 
-baseb2 = ba.tempo(b_marv4_just4*60);
+baseb2 = ba.tempo(rhythm_b*60);
 p2 = ba.pulse(baseb2);
 hit2 = sy.popFilterDrum(drumfrq, 5, p2) * beat2;
 
-baseb3 = ba.tempo(b_sept4_marv4*60);
+baseb3 = ba.tempo(rhythm_c*60);
 p3 = ba.pulse(baseb3);
 hit3 = sy.popFilterDrum(drumfrq, 5, p3) * beat3;
 
-baseb4 = ba.tempo(b_bizougo5_perf5*60);
+baseb4 = ba.tempo(rhythm_d*60);
 p4 = ba.pulse(baseb4);
 hit4 = sy.popFilterDrum(drumfrq, 5, p4) * beat4;
 
-baseb5 = ba.tempo(b_marv4_bizougo5*60);
+baseb5 = ba.tempo(rhythm_e*60);
 p5 = ba.pulse(baseb5);
 hit5 = sy.popFilterDrum(drumfrq, 5, p5) * beat5;
 
-baseb6 = ba.tempo(b_maj3_septsub4*60);
+baseb6 = ba.tempo(rhythm_f*60);
 p6 = ba.pulse(baseb6);
 hit6 = sy.popFilterDrum(drumfrq, 5, p6) * beat6;
 
-process = ((osc0 + osc1 + osc2 + osc3 + osc4 + osc5 + osc6 + osc7 + osc8 + osc9) * vol), ((hit1 + hit2 + hit3 + hit4 + hit5 + hit6) * vol) : _,_;
+process = (( osc1 + osc2 + osc3 + osc4 + osc5 + osc6 + osc7 + osc8 + osc9 + osc10 + osc11 + osc12 + osc13 + osc14) * vol),
+	  ((hit1 + hit2 + hit3 + hit4 + hit5 + hit6) * vol);
 
 // process = hit;
-  // 1200 * (ma.log2 * (3/2));
+// 1200 * (ma.log2 * (3/2));
+
