@@ -1,5 +1,7 @@
-* related files
+#+name: Historic Studio Score
+#+author: Henrik Frisk
 
+* related files
 * main music function
 :PROPERTIES:
 :header-args: :noweb yes
@@ -88,7 +90,7 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
 #+end_src
 
 
-** drum staff
+** segment A
 :PROPERTIES:
 :header-args: :noweb yes
 :END:
@@ -101,9 +103,11 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
       <<four_to_twentyf>>
       <<three_to_sixteen>>
        <<one_to_ten>>    
+
+        #(set-default-paper-size "a3" 'landscape)
         
         \score {
-  	<<
+  	<< \new StaffGroup <<
   	  \new DrumStaff \with {
   				% \remove Bar_engraver
   	    drumStyleTable = #percussion-style
@@ -111,7 +115,7 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   	  } \drummode {
   	    \tempo 4 = 78
   	    \clef percussion 
-  	    \one-to-six
+  	    \bar ".|:" \one-to-six \bar ":|."
   	  }
   	  \new DrumStaff \with {
   				% \remove Bar_engraver
@@ -119,7 +123,15 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   	    \override StaffSymbol.line-count = #1
   	  } \drummode {
   	    \clef percussion 
-  	    \two-to-fifteen
+  	    \two-to-fifteen |
+  	  }
+  	  \new DrumStaff \with {
+  				% \remove Bar_engraver
+  	    drumStyleTable = #percussion-style
+  	    \override StaffSymbol.line-count = #1
+  	  } \drummode {
+  	    \clef percussion
+  	    \one-to-eleven 
   	  }
   	  \new DrumStaff \with {
   				% \remove Bar_engraver
@@ -127,7 +139,7 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   	    \override StaffSymbol.line-count = #1
   	  } \drummode {
   	    \clef percussion 
-  	    \one-to-eleven
+  	    \four-to-twentyf 
   	  }
   	  \new DrumStaff \with {
   				% \remove Bar_engraver
@@ -135,7 +147,7 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   	    \override StaffSymbol.line-count = #1
   	  } \drummode {
   	    \clef percussion 
-  	    \four-to-twentyf
+  	    \three-to-sixteen |
   	  }
   	  \new DrumStaff \with {
   				% \remove Bar_engraver
@@ -143,17 +155,14 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
   	    \override StaffSymbol.line-count = #1
   	  } \drummode {
   	    \clef percussion 
-  	    \three-to-sixteen
+  	    \one-to-ten | s1
   	  }
-  	  \new DrumStaff \with {
-  				% \remove Bar_engraver
-  	    drumStyleTable = #percussion-style
-  	    \override StaffSymbol.line-count = #1
-  	  } \drummode {
-  	    \clef percussion 
-  	    \one-to-ten
-  	  }
+  	  \new Staff {
+  	    \clef bass c,1\mp~ c,4
+  	    }
+  	  
   	>>
+  	 >>
         }
         \layout{}
         
@@ -161,6 +170,12 @@ Use the [[main_funct][main_funct]] as a bolier plate. Generate the music file. B
 
 #+RESULTS: drum_funct
 [[file:output/beatingA.png]]
+
+#+begin_src shell :var lily=drum_funct :dir /Volumes/Freedom/Dropbox/Music/pieces/historic_studio/score/output
+  lilypond --svg intro.ly
+#+end_src
+
+#+RESULTS:
 
 ** original pitches
 - 75/56   
@@ -450,7 +465,7 @@ Function for eh-printer
 #+end_src
 
 #+RESULTS:
-[[file:5-7-space-scale.png]]
+Q[[file:5-7-space-scale.png]]
 ** sounds
 :PROPERTIES:
 :header-args: :var gfreq=261.1
@@ -474,7 +489,9 @@ The first seven intervals are calculated based on the root 200Hz. The piece howe
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
       \tuplet 6/8 {
         \override NoteHead.style = #'triangle
-        a16^\markup \mysans "32/25 against 5/4" a a a a a
+        a16\ff
+        ^\markup \mysans "32/25 against 5/4"
+        a a a a a
       }
       \tuplet 6/8 {
         \override NoteHead.style = #'triangle
@@ -500,7 +517,7 @@ Two kinds of minor sixths beating at a slow frequency (9.1809 beats/second)
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
       \tuplet 7/8 {
         \override NoteHead.style = #'triangle
-        a16^\markup \mysans "8/5 against 25/16" a a a a a a
+        a16\ff^\markup \mysans "8/5 against 25/16" a a a a a a
       }
       \tuplet 7/8 {
         \override NoteHead.style = #'triangle
@@ -524,11 +541,26 @@ Two kinds of minor sixths beating at a slow frequency (9.1809 beats/second)
     \relative c {
       \override Score.NonMusicalPaperColumn.padding = #3
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
+      \override TextSpanner.style = #'line
+      \override TextSpanner.Y-offset = #4
       \tuplet 11/16 {
         \override NoteHead.style = #'triangle
-        a16^\markup \mysans "64/49 against 5/4" a a a
-        a a a a
+        a16\ff
+        ^\markup \mysans "64/49 against 5/4"
+        ^\markup \sans "[80.00'']"
+        \startTextSpan
         a a a
+        a a a a
+        a a a |}
+      \tuplet 11/16 {
+        a16 a a a
+        a\> a a a
+        a a a
+      }
+      \tuplet 11/16 {
+        a16 a a a
+        a a a a
+        a a a\!\stopTextSpan
       }
     }
   }
@@ -551,7 +583,10 @@ Two kinds of minor sixths beating at a slow frequency (9.1809 beats/second)
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
       \tuplet 25/16 {
         \override NoteHead.style = #'triangle
-        a4^\markup \mysans "25/16 against 49/32" a a a a a a16~
+        a4\ff^\markup \mysans "25/16 against 49/32" a a a a a a16~ } |
+      \tuplet 25/16 {
+        a8.\> a4 a4 a4 a4 a4 a8 \!|
+        
       }
     }
   }
@@ -571,14 +606,16 @@ The difference between $64/49$, the /supersupermajer third/, which is the sum of
 
 #+name: three_to_sixteen
 #+begin_src lilypond  :eval never-export
-  three-to-sixteen = {
-    \relative c {
-      \override Score.NonMusicalPaperColumn.padding = #3
-      \override TupletNumber.text = #tuplet-number::calc-fraction-text
-      \override NoteHead.style = #'triangle
-      a8.^\markup \mysans "64/49 against 32/25" a8. a8. a8. a8. a16~
+    three-to-sixteen = {
+      \relative c {
+        \override Score.NonMusicalPaperColumn.padding = #3
+        \override TupletNumber.text = #tuplet-number::calc-fraction-text
+        \override NoteHead.style = #'triangle
+        a8.\ff^\markup \mysans "64/49 against 32/25" a16~ a8 a8~ a16 a8. a8. a16~ |
+        a8\> a8~ a16 a8. a8.\! r16 r4 |
+      }
+      
     }
-  }
 #+end_src
 
 *** 6- 8/7 against 35/32 
@@ -599,7 +636,7 @@ The difference between $8/7$, the /super major second/, and $35/32$ the /septima
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
       \override NoteHead.style = #'triangle
       \tuplet 10/16 {
-        a16^\markup \mysans "8/7 against 35/32" a a a a a a a a a }
+        a16\ff^\markup \mysans "8/7 against 35/32" a a a a a a a a a }
     }
   }
 
@@ -729,18 +766,17 @@ Time for the second section based on:
 #+RESULTS: paus
 [[file:output/paus.png]]
 
-*** second interval with beat #1 
-Time for the second section based on:
+*** second interval with beat #1
 
-#+begin_src scheme :var freq=261.6 R1='64/49' R2='32/25' T=60
-  (exact->inexact (* (/ 1 gfreq (- R1 R2)) T))
+The difference between $64/49$, the /supersupermajer third/, which is the sum of two major seconds $8/7$ and the slightly smaller, /classical diminished fourth/ $32/25$ results in the proportion $49/256 \approx 3/16$
+
+#+begin_src scheme :var freq=200 R1='64/49' R2='32/25' :eval never-export
+  (/ 1 freq (- R1 R2))
 #+end_src
 
-#+RESULTS:
-: 8.796916890080427
-
-#+name: section_two_with_beat
-#+begin_src lilypond :file output/section_2_beat.png :tangle output/section_2_beat.ly
+This is Segment C in the score where the beating is complemented with a percussion sound that fades in.
+#+name: C_section_with_beat
+#+begin_src lilypond :file output/section_2_beat.png :tangle output/section_C_beat.ly
   <<stuff>>
     music = {
       \relative c' {
@@ -753,7 +789,7 @@ Time for the second section based on:
         ^\markup \nobox "(-38)"
         _\markup \mysans "32/25"
         _\markup \nobox "(27)"
-        \> s4 s4\!
+        \> s4 s8. s16\!
       }
     }
     perc-music = {
@@ -761,7 +797,8 @@ Time for the second section based on:
         \override Score.NonMusicalPaperColumn.padding = #3
         \override TupletNumber.text = #tuplet-number::calc-fraction-text
         \override NoteHead.style = #'triangle
-        \time 6/4 a8. a8. a8. a8. a8. a8. a8. a8. \bar ":|."
+        \time 6/4 \bar ".|:" a8.\ppp\< a8. a8. a8. a8. a8. a8. a8. \bar ":|."
+        a4\!\fff 
       }
     }
     <<main_funct_two_staffs>>
@@ -781,11 +818,11 @@ Time for the second section based on:
         \override TupletNumber.text = #tuplet-number::calc-fraction-text
         \tuplet 6/8 {
   	\override NoteHead.style = #'triangle
-  	a16\< a a a a a
+  	\bar ".|:" a16\pp\< a a a a a
         }
         \tuplet 6/8 {
   	\override NoteHead.style = #'triangle
-  	a a a a a a \! \bar ":|." 
+  	a a a a a a \!\mf \bar ":|." 
         }
       }
     }
@@ -794,3 +831,50 @@ Time for the second section based on:
 
 #+RESULTS: section_two_added_beat
 [[file:output/section_2_beat_2.png]]
+*** Segment C 64/49 against 32/25
+The difference between $64/49$, the /supersupermajer third/, which is the sum of two major seconds $8/7$ and the slightly smaller, /classical diminished fourth/ $32/25$ results in the proportion $49/256 \approx 3/16$
+
+#+begin_src scheme :var freq=200 R1='64/49' R2='32/25' :eval never-export
+  (/ 1 freq (- R1 R2))
+#+end_src
+
+#+RESULTS:
+: 49/256
+
+#+name: eleven_to_sixteen
+#+begin_src lilypond :eval never-export :tangle output/segmant_c.ly
+    <<stuff>>
+      music = {
+        \relative c' {
+          \mark \markup \sans "[8.79'']"
+          <
+      	fubb\laissezVibrer
+      	euaa\laissezVibrer
+          >1
+          ^\markup \mysans "64/49"
+          ^\markup \nobox "(-38)"
+          _\markup \mysans "32/25"
+          _\markup \nobox "(27)"
+          \> s4 s8. s16\!
+        }
+      }
+      perc-music = {
+   %% ".|:" a8. a8. a8. a8. a8. a8. a8. a8. \bar ":|."
+      \relative c {
+        \override Score.NonMusicalPaperColumn.padding = #3
+        \override TupletNumber.text = #tuplet-number::calc-fraction-text
+        \override TextSpanner.style = #'line
+        \override TextSpanner.Y-offset = #4
+        \tuplet 11/16 {
+          \override NoteHead.style = #'triangle
+          ".|:" a16\ff\>
+          a a a
+          a a a a
+          a a a\! ":|."
+        }
+      }
+      <<main_funct>>
+#+end_src
+
+
+

@@ -25,7 +25,7 @@
       ^\markup \nobox "(-38)"
       _\markup \mysans "32/25"
       _\markup \nobox "(27)"
-      \> s4 s4\!
+      \> s4 s8. s16\!
     }
   }
   perc-music = {
@@ -33,7 +33,8 @@
       \override Score.NonMusicalPaperColumn.padding = #3
       \override TupletNumber.text = #tuplet-number::calc-fraction-text
       \override NoteHead.style = #'triangle
-      \time 6/4 a8. a8. a8. a8. a8. a8. a8. a8. \bar ":|."
+      \time 6/4 \bar ".|:" a8.\ppp\< a8. a8. a8. a8. a8. a8. a8. \bar ":|."
+      \time 6/4 a4\!\fff 
     }
   }
     \score {
